@@ -315,8 +315,8 @@ for more info).
 ** Personal Information
 It's useful to have some basic personal information
 #+begin_src emacs-lisp
-(setq user-full-name "TEC"
-      user-mail-address "tec@tecosaur.com")
+(setq user-full-name "taheris"
+      user-mail-address "git@taheris.net")
 #+end_src
 Apparently this is used by ~GPG~, and all sorts of other things.
 
@@ -341,18 +341,18 @@ the following:
  window-combination-resize t                      ; take new window space from all other windows (not just current)
  x-stretch-cursor t)                              ; Stretch cursor to the glyph width
 
-(setq undo-limit 80000000                         ; Raise undo-limit to 80Mb
-      evil-want-fine-undo t                       ; By default while in insert all changes are one big blob. Be more granular
-      auto-save-default t                         ; Nobody likes to loose work, I certainly don't
-      truncate-string-ellipsis "…"                ; Unicode ellispis are nicer than "...", and also save /precious/ space
-      password-cache-expiry nil                   ; I can trust my computers ... can't I?
-      ;; scroll-preserve-screen-position 'always     ; Don't have `point' jump around
-      scroll-margin 2)                            ; It's nice to maintain a little margin
-
-(display-time-mode 1)                             ; Enable time in the mode-line
-
-(unless (string-match-p "^Power N/A" (battery))   ; On laptops...
-  (display-battery-mode 1))                       ; it's nice to know how much power you have
+(setq auto-save-default t
+      comp-deferred-compilation t
+      confirm-kill-emacs nil
+      doom-localleader-key ","
+      evil-want-fine-undo t
+      js-indent-level 4
+      make-pointer-invisible t
+      mouse-drag-copy-region t
+      scroll-margin 2
+      truncate-string-ellipsis "…"
+      undo-limit 10485760
+      vterm-always-compile-module t)
 
 (global-subword-mode 1)                           ; Iterate through CamelCase words
 #+end_src
@@ -368,8 +368,8 @@ Then, for creating new frames within the same Emacs instance, we'll just set the
 default to be something roughly 80% of that size.
 
 #+begin_src emacs-lisp
-(add-to-list 'default-frame-alist '(height . 24))
-(add-to-list 'default-frame-alist '(width . 80))
+;(add-to-list 'default-frame-alist '(height . 24))
+;(add-to-list 'default-frame-alist '(width . 80))
 #+end_src
 *** Auto-customisations
 By default changes made via a customisation interface are added to =init.el=.
@@ -513,8 +513,8 @@ I reckon enabling half the modules Doom provides should do it.
 #+begin_src emacs-lisp
 ;;deft                       ; notational velocity for Emacs
 doom                         ; what makes DOOM look the way it does
-doom-dashboard               ; a nifty splash screen for Emacs
-doom-quit                    ; DOOM quit-message prompts when you quit Emacs
+;;doom-dashboard             ; a nifty splash screen for Emacs
+;;doom-quit                  ; DOOM quit-message prompts when you quit Emacs
 (emoji +unicode)             ; 🙂
 ;;fill-column                ; a `fill-column' indicator
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
@@ -545,7 +545,7 @@ zen                          ; distraction-free coding or writing
 (evil +everywhere)           ; come to the dark side, we have cookies
 file-templates               ; auto-snippets for empty files
 fold                         ; (nigh) universal code folding
-(format)                     ; automated prettiness
+(format +onsave)             ; automated prettiness
 ;;god                        ; run Emacs commands without modifier keys
 ;;lispy                      ; vim for lisp, for people who don't like vim
 multiple-cursors             ; editing in many places at once
@@ -553,7 +553,7 @@ multiple-cursors             ; editing in many places at once
 ;;parinfer                   ; turn lisp into python, sort of
 rotate-text                  ; cycle region at point between text candidates
 snippets                     ; my elves. They type so I don't have to
-;;word-wrap                  ; soft wrapping with language-aware indent
+word-wrap                    ; soft wrapping with language-aware indent
 #+end_src
 
 #+name: doom-emacs
@@ -576,14 +576,14 @@ vterm                        ; the best terminal emulation in Emacs
 #+name: doom-checkers
 #+begin_src emacs-lisp
 syntax                       ; tasing you for every semicolon you forget
-(:if (executable-find "aspell") spell) ; tasing you for misspelling mispelling
+(spell +aspell)              ; tasing you for misspelling mispelling
 grammar                      ; tasing grammar mistake every you make
 #+end_src
 
 #+name: doom-tools
 #+begin_src emacs-lisp
-ansible                      ; a crucible for infrastructure as code
-;;debugger                   ; FIXME stepping through code, to help you add bugs
+;;ansible                    ; a crucible for infrastructure as code
+(debugger +lsp)              ; FIXME stepping through code, to help you add bugs
 ;;direnv                     ; be direct about your environment
 docker                       ; port everything to containers
 ;;editorconfig               ; let someone else argue about tabs vs spaces
@@ -593,8 +593,7 @@ docker                       ; port everything to containers
 (lookup                      ; helps you navigate your code and documentation
  +dictionary                 ; dictionary/thesaurus is nice
  +docsets)                   ; ...or in Dash docsets locally
-lsp                          ; Language Server Protocol
-;;macos                      ; MacOS-specific commands
+(lsp +peek)                  ; Language Server Protocol
 (magit                       ; a git porcelain for Emacs
  +forge)                     ; interface with git forges
 make                         ; run make tasks from Emacs
@@ -610,7 +609,8 @@ upload                       ; map local to remote projects via ssh/ftp
 
 #+name: doom-os
 #+begin_src emacs-lisp
-tty                          ; improve the terminal Emacs experience
+(:if IS-MAC macos)           ; improve compatibility with macOS
+(tty +osc)                   ; improve the terminal Emacs experience
 #+end_src
 
 **** Language support
@@ -636,6 +636,7 @@ data                         ; config/data formats
 emacs-lisp                   ; drown in parentheses
 ;;erlang                     ; an elegant language for a more civilized age
 ess                          ; emacs speaks statistics
+;;factor                     ; for when scripts are stacked against you
 ;;faust                      ; dsp, but you get to keep your soul
 ;;fsharp                     ; ML stands for Microsoft's Language
 ;;fstar                      ; (dependent) types and (monadic) effects and Z3
@@ -654,7 +655,6 @@ json                         ; At least it ain't XML
  +cdlatex                    ; quick maths symbols
  +fold)                      ; fold the clutter away nicities
 ;;lean                       ; proof that mathematicians need help
-;;factor                     ; for when scripts are stacked against you
 ;;ledger                     ; an accounting system in Emacs
 lua                          ; one-based indices? one-based indices
 markdown                     ; writing docs for people to ignore
@@ -672,7 +672,7 @@ markdown                     ; writing docs for people to ignore
  ;;+pomodoro                 ; be fruitful with the tomato technique
  +present                    ; using org-mode for presentations
  +roam2)                     ; wander around notes
-;;php                        ; perl's insecure younger brother
+php                          ; perl's insecure younger brother
 ;;plantuml                   ; diagrams for confusing people more
 ;;purescript                 ; javascript, but functional
 (python +lsp +pyright)       ; beautiful is better than ugly
@@ -684,7 +684,7 @@ markdown                     ; writing docs for people to ignore
 ;;(ruby +rails)              ; 1.step {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
 (rust +lsp)                  ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
 ;;scala                      ; java, but good
-scheme                       ; a fully conniving family of lisps
+(scheme +guile)              ; a fully conniving family of lisps
 sh                           ; she sells {ba,z,fi}sh shells on the C xor
 ;;sml                        ; no, the /other/ ML
 ;;solidity                   ; do you need a blockchain? No.
@@ -718,16 +718,12 @@ irc                          ; how neckbeards socialize
 
 *** Visual Settings
 **** Font Face
-'Fira Code' is nice, and 'Overpass' makes for a nice sans companion. We just need to
-fiddle with the font sizes a tad so that they visually match. Just for fun I'm
-trying out JetBrains Mono though. So far I have mixed feelings on it, some
-aspects are nice, but on others I prefer Fira.
 #+begin_src emacs-lisp
-(setq doom-font (font-spec :family "JetBrains Mono" :size 24)
-      doom-big-font (font-spec :family "JetBrains Mono" :size 36)
-      doom-variable-pitch-font (font-spec :family "Overpass" :size 24)
+(setq doom-font (font-spec :family "Monaco" :size 15)
+      doom-big-font (font-spec :family "Monaco" :size 24)
+      doom-variable-pitch-font (font-spec :family "Monaco" :size 15 :weight 'semi-light)
       doom-unicode-font (font-spec :family "JuliaMono")
-      doom-serif-font (font-spec :family "IBM Plex Mono" :weight 'light))
+      doom-serif-font (font-spec :family "Monaco" :size 15 :weight 'light))
 #+end_src
 
 #+attr_html: :class invertible :alt Screenshot of the fonts within Emacs.
@@ -742,7 +738,7 @@ if the system doesn't have any of those fonts.
 
 #+name: detect-missing-fonts
 #+begin_src emacs-lisp :tangle no
-(defvar required-fonts '("JetBrainsMono.*" "Overpass" "JuliaMono" "IBM Plex Mono" "Merriweather" "Alegreya"))
+(defvar required-fonts '("Overpass" "JuliaMono" "Merriweather" "Alegreya"))
 
 (defvar available-fonts
   (delete-dups (or (font-family-list)
@@ -1369,21 +1365,6 @@ our package manager can't deal with; see [[https://github.com/raxod502/straight.
 (package! builtin-package :recipe (:branch "develop"))
 #+end_src
 ** Convenience
-*** Avy
-#+begin_quote
-From the =:config default= module.
-#+end_quote
-
-
-What a wonderful way to jump to buffer positions, and it uses the QWERTY
-home-row for jumping. Very convenient ... except I'm using Colemak.
-
-#+begin_src emacs-lisp :tangle (if (= 0 (call-process "sh" nil nil nil "-c" "dmesg | grep -q 'ErgoDox'")) "yes" "no")
-(after! avy
-  ;; home row priorities: 8 6 4 5 - - 1 2 3 7
-  (setq avy-keys '(?n ?e ?i ?s ?t ?r ?i ?a)))
-#+end_src
-
 *** Rotate (window management)
 The =rotate= package just adds the ability to rotate window layouts, but that
 sounds nice to me.
@@ -1665,7 +1646,7 @@ cd aspell6-en-custom
 #+end_src
 **** Configuration
 #+begin_src emacs-lisp
-(setq ispell-dictionary "en-custom")
+;(setq ispell-dictionary "en-custom")
 #+end_src
 Oh, and by the way, if ~company-ispell-dictionary~ is ~nil~, then
 ~ispell-complete-word-dict~ is used instead, which once again when ~nil~ is
@@ -1859,25 +1840,6 @@ so I'd like to make sure we have a recent version.
 
 #+begin_src emacs-lisp :tangle packages.el
 (package! modus-themes :pin "52532a1ac2f3b707e79ba67ada8bf36846e45048")
-#+end_src
-
-*** Theme magic
-
-With all our fancy Emacs themes, my terminal is missing out!
-#+begin_src emacs-lisp :tangle packages.el
-(package! theme-magic :pin "844c4311bd26ebafd4b6a1d72ddcc65d87f074e3")
-#+end_src
-
-Let's automatically update terminals on theme change (as long as ~pywal~ is available).
-
-Unfortunately, as the theme is set on startup this causes the hook to be run
-immediately. It would be nicer to /not/ have this add to our precious startup
-time (around 0.4s last time I checked).
-We can achieve this by deferring it with a short idle timer that should add the
-hook /just after/ initialisation.
-
-#+begin_src emacs-lisp :tangle (if (executable-find "wal") "yes" "no")
-(run-with-idle-timer 0.1 nil (lambda () (add-hook 'doom-load-theme-hook 'theme-magic-from-emacs)))
 #+end_src
 
 *** Emojify
@@ -2116,7 +2078,7 @@ for writeroom mode.
     "A variable-pitch face with serifs."
     :group 'basic-faces)
   (setq mixed-pitch-set-height t)
-  (setq variable-pitch-serif-font (font-spec :family "Alegreya" :size 27))
+  (setq variable-pitch-serif-font (font-spec :family "Alegreya" :size 16))
   (set-face-attribute 'variable-pitch-serif nil :font variable-pitch-serif-font)
   (defun mixed-pitch-serif-mode (&optional arg)
     "Change the default face of the current buffer to a serifed variable pitch, while keeping some faces fixed pitch."
@@ -2831,7 +2793,7 @@ something through Emacs?
 (use-package! calibredb
   :commands calibredb
   :config
-  (setq calibredb-root-dir "~/Desktop/TEC/Other/Ebooks"
+  (setq calibredb-root-dir "~/Documents/calibre"
         calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (map! :map calibredb-show-mode-map
         :ne "?" #'calibredb-entry-dispatch
@@ -4850,7 +4812,8 @@ to make that right again, and this package makes that even easier to do.
 [[xkcd:1319]]
 **** Tweaking defaults
 #+begin_src emacs-lisp
-(setq org-directory "~/.org"                      ; let's put files here
+(setq org-directory "~/src/github.com/taheris/org"
+      epa-file-encrypt-to '("git@taheris.net")
       org-use-property-inheritance t              ; it's convenient to have properties inherited
       org-log-done 'time                          ; having the time a item is done sounds convenient
       org-list-allow-alphabetical t               ; have a. A. a) A) list bullets
@@ -5579,13 +5542,13 @@ no modeline.
 I'll just set this to be within =Organisation= folder for now, in the future it
 could be worth seeing if I could hook this up to a [[https://nextcloud.com/][Nextcloud]] instance.
 #+begin_src emacs-lisp :noweb-ref none :tangle yes
-(setq org-roam-directory "~/Desktop/TEC/Organisation/Roam/")
+(setq org-roam-directory "~/Documents/roam/")
 #+end_src
 
 That said, if the directory doesn't exist we likely don't want to be using roam.
 Since we don't want to trigger errors (which will happen as soon as roam tries
 to initialise), let's not load roam.
-#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Desktop/TEC/Organisation/Roam/") "no" "packages.el")
+#+begin_src emacs-lisp :noweb-ref none :tangle (if (file-exists-p "~/Documents/roam/") "no" "packages.el")
 (package! org-roam :disable t)
 #+end_src
 ***** Modeline file name
@@ -10368,7 +10331,7 @@ Graphviz is a nice method of visualising simple graphs, based on plaintext
 Most of the time when I write markdown, it's going into some app/website which
 will do it's own line wrapping, hence we /only/ want to use visual line wrapping. No hard stuff.
 #+begin_src emacs-lisp
-(add-hook! (gfm-mode markdown-mode) #'visual-line-mode #'turn-off-auto-fill)
+;(add-hook! (gfm-mode markdown-mode) #'visual-line-mode #'turn-off-auto-fill)
 #+end_src
 
 Since markdown is often seen as rendered HTML, let's try to somewhat mirror the
@@ -10420,4 +10383,94 @@ Of course, there's an Emacs mode for this.
   (map! :map beancount-mode-map
         :n "TAB" #'beancount-align-to-previous-number
         :i "RET" (cmd! (newline-and-indent) (beancount-align-to-previous-number))))
+#+end_src
+
+* Additional configuration
+** Leader key-bindings
+#+begin_src emacs-lisp
+(map! :leader
+
+      (:prefix ("TAB" . "workspace")
+        :desc "Switch to"    "SPC" #'+workspace/switch-to
+        :desc "Switch left"  "h"   #'+workspace/switch-left
+        :desc "Switch right" "l"   #'+workspace/switch-right
+        :desc "Swap left"    "H"   #'+workspace/swap-left
+        :desc "Swap right"   "L"   #'+workspace/swap-right)
+
+      (:prefix ("d" . "debug")
+        :desc "Set breakpoint"  "b" #'edebug-defun
+        :desc "Undo breakpoint" "u" #'eval-defun)
+
+      )
+#+end_src
+
+** Company
+#+begin_src emacs-lisp
+(after! company
+  (setq company-box-doc-enable nil
+        company-selection-wrap-around t)
+
+  (define-key! company-active-map
+               "TAB"    #'company-complete-selection
+               [tab]    #'company-complete-selection
+               "RET"    nil
+               [return] nil))
+#+end_src
+
+** LSP
+#+begin_src emacs-lisp
+(after! lsp
+  (setq lsp-enable-file-watchers nil
+        +lsp-defer-shutdown 60)
+
+  (set-formatter! 'lsp-formatter #'lsp-format-buffer
+                  :modes '(lsp-mode)))
+
+(after! lsp-ui
+  (setq lsp-ui-doc-enable nil
+        lsp-signature-render-documentation nil))
+#+end_src
+
+** Rust
+#+begin_src emacs-lisp
+(after! rustic
+  (setq rustic-lsp-server 'rust-analyzer
+        rustic-format-trigger 'on-save
+        rustic-test-arguments "--all-features"
+        lsp-rust-analyzer-cargo-watch-command "clippy")
+
+  (map! :localleader
+        :map rustic-mode-map
+
+        :desc "Execute code action" "a" #'lsp-execute-code-action
+        :desc "Toggle inlay hints"  "h" #'lsp-rust-analyzer-inlay-hints-mode
+        :desc "Join lines"          "j" #'lsp-rust-analyzer-join-lines
+        :desc "Expand macro"        "x" #'lsp-rust-analyzer-expand-macro
+
+        (:prefix ("t" . "cargo test")
+          :desc "run tests"    "t" #'rustic-cargo-test
+          :desc "all features" "a" #'rustic-cargo-test-rerun
+          :desc "test current" "c" #'rustic-cargo-current-test)
+
+        (:prefix ("g" . "goto")
+          :desc "Definition"      "d" #'lsp-find-definition
+          :desc "Implementation"  "i" #'lsp-find-implementation
+          :desc "Reference"       "r" #'lsp-find-references
+          :desc "Type definition" "t" #'lsp-find-type-definition)))
+#+end_src
+
+** Flatbuffers
+#+begin_src emacs-lisp :tangle packages.el
+(package! flatbuffers-mode
+  :recipe (:host github :repo "Asalle/flatbuffers-mode" :files ("*.el"))
+  :pin "8e7783db45a64c9456130fd0c108ac12d45a7789")
+#+end_src
+
+** Protobuffers
+#+begin_src emacs-lisp :tangle packages.el
+(package! protobuf-mode
+  :recipe (:host github :repo "Asalle/flatbuffers-mode"
+           :files ("protobuf-mode.el" "editors/*.el"))
+  :pin "768bc823ef55889a143a98512aec8401f2b4abd3")
+
 #+end_src
