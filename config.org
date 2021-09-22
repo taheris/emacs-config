@@ -392,9 +392,9 @@ First, we'll enter the new window
 
 Then, we'll pull up a buffer prompt.
 #+begin_src emacs-lisp
-(defadvice! prompt-for-buffer (&rest _)
-  :after '(evil-window-split evil-window-vsplit)
-  (consult-buffer))
+;(defadvice! prompt-for-buffer (&rest _)
+;  :after '(evil-window-split evil-window-vsplit)
+;  (consult-buffer))
 #+end_src
 
 Window rotation is nice, and can be found under =SPC w r= and =SPC w R=.
@@ -527,7 +527,7 @@ nav-flash                    ; blink the current line after jumping
 ;;neotree                    ; a project drawer, like NERDTree for vim
 ophints                      ; highlight the region an operation acts on
 (popup                       ; tame sudden yet inevitable temporary windows
- +all                        ; catch all popups that start with an asterix
+ ;+all                        ; catch all popups that start with an asterix
  +defaults)                  ; default popup rules
 ;;(tabs                      ; an tab bar for Emacs
 ;;  +centaur-tabs)           ; ... with prettier tabs
@@ -781,7 +781,7 @@ listing the missing fonts should appear for at least half a second.
 ~doom-one~ is nice and all, but I find the ~vibrant~ variant nicer. Oh, and with the
 nice selection doom provides there's no reason for me to want the defaults.
 #+begin_src emacs-lisp
-(setq doom-theme 'doom-vibrant)
+(setq doom-theme 'doom-material)
 (remove-hook 'window-setup-hook #'doom-init-theme-h)
 (add-hook 'after-init-hook #'doom-init-theme-h 'append)
 (delq! t custom-theme-load-path)
@@ -889,322 +889,6 @@ I'd like to have just the buffer name, then if applicable the project folder
 
 For example when I open my config file it the window will be titled =config.org ●
 doom= then as soon as I make a change it will become =config.org ◉ doom=.
-*** Splash screen
-Emacs can render an image as the splash screen, and [[https://github.com/MarioRicalde][@MarioRicalde]] came up with a
-cracker! He's also provided me with a nice Emacs-style /E/. I was using the
-blackhole image, but as I've stripped down the splash screen I've switched to
-just using the /E/.
-
-#+attr_latex: :width 0.2\linewidth
-#+attr_html: :style width:20% :alt Fancy Emacs "E"
-[[file:misc/splash-images/emacs-e.svg]]
-
-Now we just make it theme-appropriate, and resize with the frame.
-
-#+begin_src emacs-lisp
-(defvar fancy-splash-image-template
-  (expand-file-name "misc/splash-images/emacs-e-template.svg" doom-private-dir)
-  "Default template svg used for the splash image, with substitutions from ")
-
-(defvar fancy-splash-sizes
-  `((:height 300 :min-height 50 :padding (0 . 2))
-    (:height 250 :min-height 42 :padding (2 . 4))
-    (:height 200 :min-height 35 :padding (3 . 3))
-    (:height 150 :min-height 28 :padding (3 . 3))
-    (:height 100 :min-height 20 :padding (2 . 2))
-    (:height 75  :min-height 15 :padding (2 . 1))
-    (:height 50  :min-height 10 :padding (1 . 0))
-    (:height 1   :min-height 0  :padding (0 . 0)))
-  "list of plists with the following properties
-  :height the height of the image
-  :min-height minimum `frame-height' for image
-  :padding `+doom-dashboard-banner-padding' (top . bottom) to apply
-  :template non-default template file
-  :file file to use instead of template")
-
-(defvar fancy-splash-template-colours
-  '(("$colour1" . keywords) ("$colour2" . type) ("$colour3" . base5) ("$colour4" . base8))
-  "list of colour-replacement alists of the form (\"$placeholder\" . 'theme-colour) which applied the template")
-
-(unless (file-exists-p (expand-file-name "theme-splashes" doom-cache-dir))
-  (make-directory (expand-file-name "theme-splashes" doom-cache-dir) t))
-
-(defun fancy-splash-filename (theme-name height)
-  (expand-file-name (concat (file-name-as-directory "theme-splashes")
-                            theme-name
-                            "-" (number-to-string height) ".svg")
-                    doom-cache-dir))
-
-(defun fancy-splash-clear-cache ()
-  "Delete all cached fancy splash images"
-  (interactive)
-  (delete-directory (expand-file-name "theme-splashes" doom-cache-dir) t)
-  (message "Cache cleared!"))
-
-(defun fancy-splash-generate-image (template height)
-  "Read TEMPLATE and create an image if HEIGHT with colour substitutions as
-   described by `fancy-splash-template-colours' for the current theme"
-  (with-temp-buffer
-    (insert-file-contents template)
-    (re-search-forward "$height" nil t)
-    (replace-match (number-to-string height) nil nil)
-    (dolist (substitution fancy-splash-template-colours)
-      (goto-char (point-min))
-      (while (re-search-forward (car substitution) nil t)
-        (replace-match (doom-color (cdr substitution)) nil nil)))
-    (write-region nil nil
-                  (fancy-splash-filename (symbol-name doom-theme) height) nil nil)))
-
-(defun fancy-splash-generate-images ()
-  "Perform `fancy-splash-generate-image' in bulk"
-  (dolist (size fancy-splash-sizes)
-    (unless (plist-get size :file)
-      (fancy-splash-generate-image (or (plist-get size :template)
-                                       fancy-splash-image-template)
-                                   (plist-get size :height)))))
-
-(defun ensure-theme-splash-images-exist (&optional height)
-  (unless (file-exists-p (fancy-splash-filename
-                          (symbol-name doom-theme)
-                          (or height
-                              (plist-get (car fancy-splash-sizes) :height))))
-    (fancy-splash-generate-images)))
-
-(defun get-appropriate-splash ()
-  (let ((height (frame-height)))
-    (cl-some (lambda (size) (when (>= height (plist-get size :min-height)) size))
-             fancy-splash-sizes)))
-
-(setq fancy-splash-last-size nil)
-(setq fancy-splash-last-theme nil)
-(defun set-appropriate-splash (&rest _)
-  (let ((appropriate-image (get-appropriate-splash)))
-    (unless (and (equal appropriate-image fancy-splash-last-size)
-                 (equal doom-theme fancy-splash-last-theme)))
-    (unless (plist-get appropriate-image :file)
-      (ensure-theme-splash-images-exist (plist-get appropriate-image :height)))
-    (setq fancy-splash-image
-          (or (plist-get appropriate-image :file)
-              (fancy-splash-filename (symbol-name doom-theme) (plist-get appropriate-image :height))))
-    (setq +doom-dashboard-banner-padding (plist-get appropriate-image :padding))
-    (setq fancy-splash-last-size appropriate-image)
-    (setq fancy-splash-last-theme doom-theme)
-    (+doom-dashboard-reload)))
-
-(add-hook 'window-size-change-functions #'set-appropriate-splash)
-(add-hook 'doom-load-theme-hook #'set-appropriate-splash)
-#+end_src
-
-Now the only thing missing is a an extra interesting line, whether that be some
-corporate BS, an developer excuse, or a fun (useless) fact.
-
-The following is rather long, but it essentially
-+ fetches a phrase from an API
-+ inserts it into the dashboard (asynchronously)
-+ moves ~point~ to the phrase
-+ re-uses the last phrase for requests within a few seconds of it being fetched
-
-#+begin_src emacs-lisp
-(defvar phrase-api-url
-  (nth (random 3)
-       '(("https://corporatebs-generator.sameerkumar.website/" :phrase)
-         ("https://useless-facts.sameerkumar.website/api" :data)
-         ("https://dev-excuses-api.herokuapp.com/" :text))))
-
-(defmacro phrase-generate-callback (token &optional format-fn ignore-read-only callback buffer-name)
-  `(lambda (status)
-     (unless (plist-get status :error)
-       (goto-char url-http-end-of-headers)
-       (let ((phrase (plist-get (json-parse-buffer :object-type 'plist) (cadr phrase-api-url)))
-             (inhibit-read-only ,(when (eval ignore-read-only) t)))
-         (setq phrase-last (cons phrase (float-time)))
-         (with-current-buffer ,(or (eval buffer-name) (buffer-name (current-buffer)))
-           (save-excursion
-             (goto-char (point-min))
-             (when (search-forward ,token nil t)
-               (with-silent-modifications
-                 (replace-match "")
-                 (insert ,(if format-fn format-fn 'phrase)))))
-           ,callback)))))
-
-(defvar phrase-last nil)
-(defvar phrase-timeout 5)
-
-(defmacro phrase-insert-async (&optional format-fn token ignore-read-only callback buffer-name)
-  `(let ((inhibit-message t))
-     (if (and phrase-last
-              (> phrase-timeout (- (float-time) (cdr phrase-last))))
-         (let ((phrase (car phrase-last)))
-           ,(if format-fn format-fn 'phrase))
-       (url-retrieve (car phrase-api-url)
-                     (phrase-generate-callback ,(or token "\ufeff") ,format-fn ,ignore-read-only ,callback ,buffer-name))
-       ;; For reference, \ufeff = Zero-width no-break space / BOM
-       ,(or token "\ufeff"))))
-
-(defun doom-dashboard-phrase ()
-  (phrase-insert-async
-   (progn
-     (setq-local phrase-position (point))
-     (mapconcat
-      (lambda (line)
-        (+doom-dashboard--center
-         +doom-dashboard--width
-         (with-temp-buffer
-           (insert-text-button
-            line
-            'action
-            (lambda (_)
-              (setq phrase-last nil)
-              (+doom-dashboard-reload t))
-            'face 'doom-dashboard-menu-title
-            'mouse-face 'doom-dashboard-menu-title
-            'help-echo "Random phrase"
-            'follow-link t)
-           (buffer-string))))
-      (split-string
-       (with-temp-buffer
-         (insert phrase)
-         (setq fill-column (min 70 (/ (* 2 (window-width)) 3)))
-         (fill-region (point-min) (point-max))
-         (buffer-string))
-       "\n")
-      "\n"))
-   nil t
-   (progn
-     (goto-char phrase-position)
-     (forward-whitespace 1))
-   +doom-dashboard-name))
-
-(defadvice! doom-dashboard-widget-loaded-with-phrase ()
-  :override #'doom-dashboard-widget-loaded
-  (setq line-spacing 0.2)
-  (insert
-   "\n\n"
-   (propertize
-    (+doom-dashboard--center
-     +doom-dashboard--width
-     (doom-display-benchmark-h 'return))
-    'face 'doom-dashboard-loaded)
-   "\n"
-   (doom-dashboard-phrase)
-   "\n"))
-#+end_src
-
-Lastly, the doom dashboard "useful commands" are no longer useful to me.
-So, we'll disable them and then for a particularly /clean/ look disable
-the modeline and ~hl-line-mode~, then also hide the cursor.
-
-#+begin_src emacs-lisp
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
-(add-hook! '+doom-dashboard-mode-hook (hide-mode-line-mode 1) (hl-line-mode -1))
-(setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
-#+end_src
-
-At the end, we have a minimal but rather nice splash screen.
-
-#+attr_html: :class invertible :alt The splash screen, just loaded.
-[[https://tecosaur.com/lfs/emacs-config/screenshots/splash-screen.png]]
-
-I haven't forgotten about the ASCII banner though! Once again we're going for
-something simple.
-
-#+begin_src emacs-lisp
-(defun doom-dashboard-draw-ascii-emacs-banner-fn ()
-  (let* ((banner
-          '(",---.,-.-.,---.,---.,---."
-            "|---'| | |,---||    `---."
-            "`---'` ' '`---^`---'`---'"))
-         (longest-line (apply #'max (mapcar #'length banner))))
-    (put-text-property
-     (point)
-     (dolist (line banner (point))
-       (insert (+doom-dashboard--center
-                +doom-dashboard--width
-                (concat
-                 line (make-string (max 0 (- longest-line (length line)))
-                                   32)))
-               "\n"))
-     'face 'doom-dashboard-banner)))
-
-(unless (display-graphic-p) ; for some reason this messes up the graphical splash screen atm
-  (setq +doom-dashboard-ascii-banner-fn #'doom-dashboard-draw-ascii-emacs-banner-fn))
-#+end_src
-
-*** Systemd daemon
-For running a systemd service for a Emacs server I have the following
-#+name: emacsclient service
-#+begin_src systemd :tangle ~/.config/systemd/user/emacs.service :mkdirp yes
-[Unit]
-Description=Emacs server daemon
-Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
-
-[Service]
-Type=forking
-ExecStart=sh -c 'emacs --daemon && emacsclient -c --eval "(delete-frame)"'
-ExecStop=/usr/bin/emacsclient --no-wait --eval "(progn (setq kill-emacs-hook nil) (kill emacs))"
-Restart=on-failure
-
-[Install]
-WantedBy=default.target
-#+end_src
-
-which is then enabled by
-#+begin_src shell :tangle (if (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled emacs.service")) "no" "setup.sh")
-systemctl --user enable emacs.service
-#+end_src
-
-For some reason if a frame isn't opened early in the initialisation process, the
-daemon doesn't seem to like opening frames later --- hence the ~&& emacsclient~
-part of the =ExecStart= value.
-
-It can now be nice to use this as a 'default app' for opening files. If we add
-an appropriate desktop entry, and enable it in the desktop environment.
-
-#+begin_src conf :tangle ~/.local/share/applications/emacs-client.desktop :mkdirp yes
-[Desktop Entry]
-Name=Emacs client
-GenericName=Text Editor
-Comment=A flexible platform for end-user applications
-MimeType=text/english;text/plain;text/x-makefile;text/x-c++hdr;text/x-c++src;text/x-chdr;text/x-csrc;text/x-java;text/x-moc;text/x-pascal;text/x-tcl;text/x-tex;application/x-shellscript;text/x-c;text/x-c++;
-Exec=emacsclient -create-frame --alternate-editor="" --no-wait %F
-Icon=emacs
-Type=Application
-Terminal=false
-Categories=TextEditor;Utility;
-StartupWMClass=Emacs
-Keywords=Text;Editor;
-X-KDE-StartupNotify=false
-#+end_src
-
-When the daemon is running, I almost always want to do a few particular things
-with it, so I may as well eat the load time at startup. We also want to keep
-=mu4e= running.
-
-It would be good to start the IRC client (=circe=) too, but that seems to have
-issues when started in a non-graphical session.
-
-Lastly, while I'm not sure quite why it happens, but after a bit it seems that
-new Emacsclient frames start on the =*scratch*= buffer instead of the dashboard.
-I prefer the dashboard, so let's ensure that's always switched to in new frames.
-
-#+name: daemon initialisation
-#+begin_src emacs-lisp
-(defun greedily-do-daemon-setup ()
-  (require 'org)
-  (when (require 'mu4e nil t)
-    (setq mu4e-confirm-quit t)
-    (setq +mu4e-lock-greedy t)
-    (setq +mu4e-lock-relaxed t)
-    (+mu4e-lock-add-watcher)
-    (when (+mu4e-lock-available t)
-      (mu4e~start)))
-  (when (require 'elfeed nil t)
-    (run-at-time nil (* 8 60 60) #'elfeed-update)))
-
-(when (daemonp)
-  (add-hook 'emacs-startup-hook #'greedily-do-daemon-setup)
-  (add-hook! 'server-after-make-frame-hook (switch-to-buffer +doom-dashboard-name)))
-#+end_src
 *** Emacs client wrapper
 I frequently want to make use of Emacs while in a terminal emulator. To make
 this easier, I can construct a few handy aliases.
@@ -1225,7 +909,7 @@ convenient, so I'll raise the requirement to =bash=. Since arrays are the only
 'extra' compared to =sh=, other shells like =ksh= etc. should work too.
 
 #+name: e
-#+begin_src shell :tangle ~/.local/bin/e :mkdirp yes :tangle-mode (identity #o755) :comments no
+#+begin_src shell :tangle ~/bin/em :mkdirp yes :tangle-mode (identity #o755) :comments no
 #!/usr/bin/env bash
 force_tty=false
 force_wait=false
@@ -4102,66 +3786,6 @@ if __name__ == "__main__":
     main()
 #+end_src
 
-**** Systemd
-We then have a service file to run ~goimapnotify~ on all of these generated config files.
-We'll use a template service file so we can enable a unit per-account.
-#+begin_src systemd :tangle ~/.config/systemd/user/goimapnotify@.service
-[Unit]
-Description=IMAP notifier using IDLE, golang version.
-ConditionPathExists=%h/.config/imapnotify/%I/notify.conf
-After=network.target
-
-[Service]
-ExecStart=%h/.local/bin/goimapnotify -conf %h/.config/imapnotify/%I/notify.conf
-Restart=always
-RestartSec=30
-
-[Install]
-WantedBy=default.target
-#+end_src
-
-Enabling the service is actually taken care of by that python script.
-
-From one or two small tests, this can bring the delay down to as low as five
-seconds, which I'm quite happy with.
-
-This works well for fetching new mail, but we also want to propagate other
-changes (e.g. marking mail as read), and make sure we're up to date at the
-start, so for that I'll do the 'normal' thing and run ~mbsync -all~ every so often
---- let's say five minutes.
-
-We can accomplish this via a systemd timer, and service file.
-#+begin_src systemd :tangle ~/.config/systemd/user/mbsync.timer
-[Unit]
-Description=call mbsync on all accounts every 5 minutes
-ConditionPathExists=%h/.mbsyncrc
-
-[Timer]
-OnBootSec=5m
-OnUnitInactiveSec=5m
-
-[Install]
-WantedBy=default.target
-#+end_src
-
-#+begin_src systemd :tangle ~/.config/systemd/user/mbsync.service
-[Unit]
-Description=mbsync service, sync all mail
-Documentation=man:mbsync(1)
-ConditionPathExists=%h/.mbsyncrc
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mbsync -c %h/.mbsyncrc --all
-
-[Install]
-WantedBy=mail.target
-#+end_src
-
-Enabling (and starting) this is as simple as
-#+begin_src shell :tangle (if (string= "enabled\n" (shell-command-to-string "systemctl --user is-enabled mbsync.timer")) "no" "setup.sh")
-systemctl --user enable mbsync.timer --now
-#+end_src
 *** Indexing/Searching
 This is performed by [[https://www.djcbsoftware.nl/code/mu/][Mu]]. This is a tool for finding emails stored in the [[http://en.wikipedia.org/wiki/Maildir][Maildir]] format.
 According to the homepage, it's main features are
