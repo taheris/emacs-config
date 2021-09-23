@@ -1844,7 +1844,8 @@ These annotations are skipped for remote paths."
                     (doom-blend 'red 'orange (- size-index 1)))))
       (propertize (file-size-human-readable size) 'face (list :foreground color))))
 
-  (setcdr (assq 'file marginalia-annotator-registry) '(+marginalia-annotate-file-colorful builtin none)))
+  ;(setcdr (assq 'file marginalia-annotator-registry) '(+marginalia-annotate-file-colorful builtin none))
+  )
 #+end_src
 *** Centaur Tabs
 #+begin_quote
