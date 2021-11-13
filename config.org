@@ -520,7 +520,7 @@ doom                         ; what makes DOOM look the way it does
 hl-todo                      ; highlight TODO/FIXME/NOTE/DEPRECATED/HACK/REVIEW
 ;;hydra                      ; quick documentation for related commands
 ;;indent-guides              ; highlighted indent columns, notoriously slow
-(ligatures +extra)           ; ligatures and symbols to make your code pretty again
+;(ligatures +extra)           ; ligatures and symbols to make your code pretty again
 ;;minimap                    ; show a map of the code on the side
 modeline                     ; snazzy, Atom-inspired modeline, plus API
 nav-flash                    ; blink the current line after jumping
@@ -4571,7 +4571,7 @@ To improve =org-cite=.
 #+begin_src emacs-lisp :noweb-ref none :tangle packages.el
 (package! citeproc :pin "299e52b2dda37960d609efa78c40e255001d163a")
 (package! bibtex-completion :pin "12079bb09f203dda5cc2dd003bd60a6ad490f762")
-(package! bibtex-actions :pin "0e825fafe4f5843f9af4aed0bff8cc393fcae9f2")
+;(package! bibtex-actions :pin "0e825fafe4f5843f9af4aed0bff8cc393fcae9f2")
 (package! org-cite-csl-activate :recipe (:host github :repo "andras-simonyi/org-cite-csl-activate") :pin "032e765a4cf634fc56abcd18488510d3d5b1ee09")
 #+end_src
 
@@ -4582,10 +4582,10 @@ To improve =org-cite=.
   (setq bibtex-completion-additional-search-fields '(keywords)
         bibtex-completion-pdf-field "file")) ; This tell bibtex-completion to look at the File field of the bibtex to figure out which pdf to open
 
-(use-package! bibtex-actions
-  :after embark bibtex-completion
-  :config
-  (add-to-list 'embark-keymap-alist '(bibtex . bibtex-actions-map)))
+;(use-package! bibtex-actions
+;  :after embark bibtex-completion
+;  :config
+;  (add-to-list 'embark-keymap-alist '(bibtex . bibtex-actions-map)))
 
 (use-package! citeproc
   :defer t)
@@ -4593,7 +4593,7 @@ To improve =org-cite=.
 ;;; Org-Cite configuration
 
 (use-package! oc
-  :after org bibtex-completion bibtex-actions
+  :after org bibtex-completion ;bibtex-actions
   :config
   (require 'ox)
   (map! :map org-mode-map
@@ -4641,14 +4641,14 @@ To improve =org-cite=.
         (org-cite-activate (point-max)))
       (org-cite-csl-activate-render-all))))
 
-(use-package! oc-bibtex-actions
-  :when (featurep! :completion vertico)
-  :after oc
-  :demand t
-  :config
-  (setq org-cite-insert-processor 'oc-bibtex-actions
-        org-cite-follow-processor 'oc-bibtex-actions
-        org-cite-activate-processor 'basic))
+;(use-package! oc-bibtex-actions
+;  :when (featurep! :completion vertico)
+;  :after oc
+;  :demand t
+;  :config
+;  (setq org-cite-insert-processor 'oc-bibtex-actions
+;        org-cite-follow-processor 'oc-bibtex-actions
+;        org-cite-activate-processor 'basic))
 #+end_src
 
 I think it would be nice to have a function to convert =org-ref= citations to
@@ -6226,88 +6226,88 @@ I've also added some fun alternatives, just commented out.
 #+end_src
 It's also nice to make use of the Unicode characters for check boxes, and other commands.
 #+begin_src emacs-lisp
-(appendq! +ligatures-extra-symbols
-          `(:checkbox      "☐"
-            :pending       "◼"
-            :checkedbox    "☑"
-            :list_property "∷"
-            :em_dash       "—"
-            :ellipses      "…"
-            :arrow_right   "→"
-            :arrow_left    "←"
-            :title         "𝙏"
-            :subtitle      "𝙩"
-            :author        "𝘼"
-            :date          "𝘿"
-            :property      "☸"
-            :options       "⌥"
-            :startup       "⏻"
-            :macro         "𝓜"
-            :html_head     "🅷"
-            :html          "🅗"
-            :latex_class   "🄻"
-            :latex_header  "🅻"
-            :beamer_header "🅑"
-            :latex         "🅛"
-            :attr_latex    "🄛"
-            :attr_html     "🄗"
-            :attr_org      "⒪"
-            :begin_quote   "❝"
-            :end_quote     "❞"
-            :caption       "☰"
-            :header        "›"
-            :results       "🠶"
-            :begin_export  "⏩"
-            :end_export    "⏪"
-            :properties    "⚙"
-            :end           "∎"
-            :priority_a   ,(propertize "⚑" 'face 'all-the-icons-red)
-            :priority_b   ,(propertize "⬆" 'face 'all-the-icons-orange)
-            :priority_c   ,(propertize "■" 'face 'all-the-icons-yellow)
-            :priority_d   ,(propertize "⬇" 'face 'all-the-icons-green)
-            :priority_e   ,(propertize "❓" 'face 'all-the-icons-blue)))
-(set-ligatures! 'org-mode
-  :merge t
-  :checkbox      "[ ]"
-  :pending       "[-]"
-  :checkedbox    "[X]"
-  :list_property "::"
-  :em_dash       "---"
-  :ellipsis      "..."
-  :arrow_right   "->"
-  :arrow_left    "<-"
-  :title         "#+title:"
-  :subtitle      "#+subtitle:"
-  :author        "#+author:"
-  :date          "#+date:"
-  :property      "#+property:"
-  :options       "#+options:"
-  :startup       "#+startup:"
-  :macro         "#+macro:"
-  :html_head     "#+html_head:"
-  :html          "#+html:"
-  :latex_class   "#+latex_class:"
-  :latex_header  "#+latex_header:"
-  :beamer_header "#+beamer_header:"
-  :latex         "#+latex:"
-  :attr_latex    "#+attr_latex:"
-  :attr_html     "#+attr_html:"
-  :attr_org      "#+attr_org:"
-  :begin_quote   "#+begin_quote"
-  :end_quote     "#+end_quote"
-  :caption       "#+caption:"
-  :header        "#+header:"
-  :begin_export  "#+begin_export"
-  :end_export    "#+end_export"
-  :results       "#+RESULTS:"
-  :property      ":PROPERTIES:"
-  :end           ":END:"
-  :priority_a    "[#A]"
-  :priority_b    "[#B]"
-  :priority_c    "[#C]"
-  :priority_d    "[#D]"
-  :priority_e    "[#E]")
-(plist-put +ligatures-extra-symbols :name "⁍")
+;(appendq! +ligatures-extra-symbols
+;          `(:checkbox      "☐"
+;            :pending       "◼"
+;            :checkedbox    "☑"
+;            :list_property "∷"
+;            :em_dash       "—"
+;            :ellipses      "…"
+;            :arrow_right   "→"
+;            :arrow_left    "←"
+;            :title         "𝙏"
+;            :subtitle      "𝙩"
+;            :author        "𝘼"
+;            :date          "𝘿"
+;            :property      "☸"
+;            :options       "⌥"
+;            :startup       "⏻"
+;            :macro         "𝓜"
+;            :html_head     "🅷"
+;            :html          "🅗"
+;            :latex_class   "🄻"
+;            :latex_header  "🅻"
+;            :beamer_header "🅑"
+;            :latex         "🅛"
+;            :attr_latex    "🄛"
+;            :attr_html     "🄗"
+;            :attr_org      "⒪"
+;            :begin_quote   "❝"
+;            :end_quote     "❞"
+;            :caption       "☰"
+;            :header        "›"
+;            :results       "🠶"
+;            :begin_export  "⏩"
+;            :end_export    "⏪"
+;            :properties    "⚙"
+;            :end           "∎"
+;            :priority_a   ,(propertize "⚑" 'face 'all-the-icons-red)
+;            :priority_b   ,(propertize "⬆" 'face 'all-the-icons-orange)
+;            :priority_c   ,(propertize "■" 'face 'all-the-icons-yellow)
+;            :priority_d   ,(propertize "⬇" 'face 'all-the-icons-green)
+;            :priority_e   ,(propertize "❓" 'face 'all-the-icons-blue)))
+;(set-ligatures! 'org-mode
+;  :merge t
+;  :checkbox      "[ ]"
+;  :pending       "[-]"
+;  :checkedbox    "[X]"
+;  :list_property "::"
+;  :em_dash       "---"
+;  :ellipsis      "..."
+;  :arrow_right   "->"
+;  :arrow_left    "<-"
+;  :title         "#+title:"
+;  :subtitle      "#+subtitle:"
+;  :author        "#+author:"
+;  :date          "#+date:"
+;  :property      "#+property:"
+;  :options       "#+options:"
+;  :startup       "#+startup:"
+;  :macro         "#+macro:"
+;  :html_head     "#+html_head:"
+;  :html          "#+html:"
+;  :latex_class   "#+latex_class:"
+;  :latex_header  "#+latex_header:"
+;  :beamer_header "#+beamer_header:"
+;  :latex         "#+latex:"
+;  :attr_latex    "#+attr_latex:"
+;  :attr_html     "#+attr_html:"
+;  :attr_org      "#+attr_org:"
+;  :begin_quote   "#+begin_quote"
+;  :end_quote     "#+end_quote"
+;  :caption       "#+caption:"
+;  :header        "#+header:"
+;  :begin_export  "#+begin_export"
+;  :end_export    "#+end_export"
+;  :results       "#+RESULTS:"
+;  :property      ":PROPERTIES:"
+;  :end           ":END:"
+;  :priority_a    "[#A]"
+;  :priority_b    "[#B]"
+;  :priority_c    "[#C]"
+;  :priority_d    "[#D]"
+;  :priority_e    "[#E]")
+;(plist-put +ligatures-extra-symbols :name "⁍")
 #+end_src
 
 ~org-superstar-mode~ is great. While we're at it we may as well make tags prettier as well 🙂
@@ -8809,51 +8809,51 @@ Now, there are some symbols that aren't included in =inputenc=, but we should be
 able to handle anyway. For them we define a table of LaTeX translations
 
 #+name: latex-non-ascii-char-substitutions
-| Character | LaTeX |
-|-----------+-------|
-| ɑ         | \(\alpha\) |
-| β         | \(\beta\) |
-| γ         | \(\gamma\) |
-| δ         | \(\delta\) |
-| ε         | \(\epsilon\) |
-| ϵ         | \(\varepsilon\) |
-| ζ         | \(\zeta\) |
-| η         | \(\eta\) |
-| θ         | \(\theta\) |
-| ϑ         | \(\vartheta\) |
-| ι         | \(\iota\) |
-| κ         | \(\kappa\) |
-| λ         | \(\lambda\) |
-| μ         | \(\mu\) |
-| ν         | \(\nu\) |
-| ξ         | \(\xi\) |
-| π         | \(\pi\) |
-| ϖ         | \(\varpi\) |
-| ρ         | \(\rho\) |
+| Character | LaTeX       |
+|-----------+-------------|
+| ɑ         | \(\alpha\)       |
+| β         | \(\beta\)       |
+| γ         | \(\gamma\)       |
+| δ         | \(\delta\)       |
+| ε         | \(\epsilon\)       |
+| ϵ         | \(\varepsilon\)       |
+| ζ         | \(\zeta\)       |
+| η         | \(\eta\)       |
+| θ         | \(\theta\)       |
+| ϑ         | \(\vartheta\)       |
+| ι         | \(\iota\)       |
+| κ         | \(\kappa\)       |
+| λ         | \(\lambda\)       |
+| μ         | \(\mu\)       |
+| ν         | \(\nu\)       |
+| ξ         | \(\xi\)       |
+| π         | \(\pi\)       |
+| ϖ         | \(\varpi\)       |
+| ρ         | \(\rho\)       |
 | ϱ         | \(\varrho\) |
-| σ         | \(\sigma\) |
-| ς         | \(\varsigma\) |
-| τ         | \(\tau\) |
-| υ         | \(\upsilon\) |
-| ϕ         | \(\phi\) |
-| φ         | \(\varphi\) |
-| ψ         | \(\psi\) |
-| ω         | \(\omega\) |
-| Γ         | \(\Gamma\) |
-| Δ         | \(\Delta\) |
-| Θ         | \(\Theta\) |
-| Λ         | \(\Lambda\) |
-| Ξ         | \(\Xi\) |
-| Π         | \(\Pi\) |
-| Σ         | \(\Sigma\) |
-| Υ         | \(\Upsilon\) |
-| Φ         | \(\Phi\) |
-| Ψ         | \(\Psi\) |
-| Ω         | \(\Omega\) |
-| א         | \(\aleph\) |
-| ב         | \(\beth\) |
+| σ         | \(\sigma\)       |
+| ς         | \(\varsigma\)       |
+| τ         | \(\tau\)       |
+| υ         | \(\upsilon\)       |
+| ϕ         | \(\phi\)       |
+| φ         | \(\varphi\)       |
+| ψ         | \(\psi\)       |
+| ω         | \(\omega\)       |
+| Γ         | \(\Gamma\)       |
+| Δ         | \(\Delta\)       |
+| Θ         | \(\Theta\)       |
+| Λ         | \(\Lambda\)       |
+| Ξ         | \(\Xi\)       |
+| Π         | \(\Pi\)       |
+| Σ         | \(\Sigma\)       |
+| Υ         | \(\Upsilon\)       |
+| Φ         | \(\Phi\)       |
+| Ψ         | \(\Psi\)       |
+| Ω         | \(\Omega\)       |
+| א         | \(\aleph\)       |
+| ב         | \(\beth\)       |
 | ד         | \(\daleth\) |
-| ג         | \(\gimel\) |
+| ג         | \(\gimel\)       |
 
 #+name: gen-latex-non-ascii-char-substitutions
 #+begin_src emacs-lisp :noweb-ref none :var latex-non-ascii-char-substitutions=latex-non-ascii-char-substitutions
@@ -9897,29 +9897,29 @@ Lastly, whenever Emacs is non-graphical (i.e. a TUI), we want to use this by def
 ** R
 *** Editor Visuals
 #+begin_src emacs-lisp
-(after! ess-r-mode
-  (appendq! +ligatures-extra-symbols
-            '(:assign "⟵"
-              :multiply "×"))
-  (set-ligatures! 'ess-r-mode
-    ;; Functional
-    :def "function"
-    ;; Types
-    :null "NULL"
-    :true "TRUE"
-    :false "FALSE"
-    :int "int"
-    :floar "float"
-    :bool "bool"
-    ;; Flow
-    :not "!"
-    :and "&&" :or "||"
-    :for "for"
-    :in "%in%"
-    :return "return"
-    ;; Other
-    :assign "<-"
-    :multiply "%*%"))
+;(after! ess-r-mode
+;  (appendq! +ligatures-extra-symbols
+;            '(:assign "⟵"
+;              :multiply "×"))
+;  (set-ligatures! 'ess-r-mode
+;    ;; Functional
+;    :def "function"
+;    ;; Types
+;    :null "NULL"
+;    :true "TRUE"
+;    :false "FALSE"
+;    :int "int"
+;    :floar "float"
+;    :bool "bool"
+;    ;; Flow
+;    :not "!"
+;    :and "&&" :or "||"
+;    :for "for"
+;    :in "%in%"
+;    :return "return"
+;    ;; Other
+;    :assign "<-"
+;    :multiply "%*%"))
 #+end_src
 ** Julia
 As mentioned in [[https://github.com/non-Jedi/lsp-julia/issues/35][lsp-julia#35]], =lsp-mode= seems to serve an invalid response to the
@@ -10014,7 +10014,6 @@ Of course, there's an Emacs mode for this.
 ** Leader key-bindings
 #+begin_src emacs-lisp
 (map! :leader
-
       (:prefix ("TAB" . "workspace")
         :desc "Switch to"    "SPC" #'+workspace/switch-to
         :desc "Switch left"  "h"   #'+workspace/switch-left
@@ -10072,6 +10071,9 @@ Of course, there's an Emacs mode for this.
         :desc "Join lines"          "j" #'lsp-rust-analyzer-join-lines
         :desc "Expand macro"        "x" #'lsp-rust-analyzer-expand-macro
 
+        :desc "Cargo Format"        "f" #'rustic-cargo-fmt
+        :desc "Cargo Check"         "k" #'rustic-cargo-check
+
         (:prefix ("t" . "cargo test")
           :desc "run tests"    "t" #'rustic-cargo-test
           :desc "all features" "a" #'rustic-cargo-test-rerun
@@ -10084,18 +10086,36 @@ Of course, there's an Emacs mode for this.
           :desc "Type definition" "t" #'lsp-find-type-definition)))
 #+end_src
 
+** Protobuf
+#+begin_src emacs-lisp :tangle packages.el
+(package! protobuf-mode
+  :recipe (:host github :repo "protocolbuffers/protobuf"
+           :files ("protobuf-mode.el" "editors/*.el"))
+  :pin "13d559beb6967033a467a7517c35d8ad970f8afb")
+
+(after! protobuf-mode
+  (defun flycheck-protobuf-buf-project-root (&optional _checker)
+    "Return the nearest directory holding the buf.yaml configuration."
+    (and buffer-file-name
+        (locate-dominating-file buffer-file-name "buf.yaml")))
+
+  (flycheck-define-checker protobuf-buf
+    "A protobuf syntax checker: `https://github.com/bufbuild/buf'"
+    :command ("buf" "lint" "--path" source-original)
+    :error-patterns
+    ((warning line-start (file-name) ":" line ":" column ":" (message) line-end))
+    :modes protobuf-mode
+    :enabled flycheck-protobuf-buf-project-root
+    :working-directory flycheck-protobuf-buf-project-root
+    :predicate flycheck-buffer-saved-p)
+
+  (add-to-list 'flycheck-checkers 'protobuf-buf))
+
+#+end_src
+
 ** Flatbuffers
 #+begin_src emacs-lisp :tangle packages.el
 (package! flatbuffers-mode
   :recipe (:host github :repo "Asalle/flatbuffers-mode" :files ("*.el"))
   :pin "8e7783db45a64c9456130fd0c108ac12d45a7789")
-#+end_src
-
-** Protobuffers
-#+begin_src emacs-lisp :tangle packages.el
-(package! protobuf-mode
-  :recipe (:host github :repo "Asalle/flatbuffers-mode"
-           :files ("protobuf-mode.el" "editors/*.el"))
-  :pin "768bc823ef55889a143a98512aec8401f2b4abd3")
-
 #+end_src
